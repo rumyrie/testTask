@@ -20,8 +20,8 @@ class Task_model extends Model
 
         $this->db->beginTransaction();
         $query = "
-            insert into `tasks` (`login`, `password`) values
-            (:login, :password);
+            insert into `tasks` (`userName`, `email`, `text`, `status_id`) values
+            (:userName, :email, :text, 0);
         ";
         $res = $this->db->prepare($query);
 
@@ -91,5 +91,75 @@ class Task_model extends Model
             $result['Error_Msg'] = $this->db->errorInfo();
             return $result;
         }
+    }
+
+    public function getList($data)
+    {
+        $result = [
+            'success' => true,
+            'data' => []
+        ];
+
+        $params['offset'] = 0;
+
+        if (isset($data['page'])) {
+            $params['offset'] = 3 * $data['page'];
+        }
+
+        $order = '';
+        if (isset($data['order'])) {
+            $order = $this->prepareOrderPart($data);
+        }
+
+        $query = "
+            select
+                `t`.`uid`,
+                `t`.`user`,
+                `t`.`email`,   
+                `t`.`text`,
+                `s`.`status_text`  
+            from `tasks` t
+                left join `statuses` s on s.`status_id` = t.`status_id`
+            {$order}
+            limit 3
+            offset :offset
+        ";
+        $res = $this->db->prepare($query);
+        $res->execute($params);
+        $res = $res->fetchAll();
+        if (empty($res)) {
+            $result['success'] = false;
+        } else {
+            $result['data'] = json_encode($res);
+        }
+
+        return $result;
+    }
+
+    private function prepareOrderPart($data)
+    {
+        $parts = explode('/', $data);
+        switch ($parts[0]) {
+            case 'userName':
+                $order = "order by
+                `userName` {$parts[1]}";
+                break;
+            case 'email':
+                $order = "order by
+                `email` {$parts[1]}";
+                break;
+            case 'status':
+                $order = "order by
+                case when (s.`status_id` in (0, 3))
+                    then 1
+                    else 0
+                end {$parts[1]}";
+                break;
+            default:
+                $order = '';
+                break;
+        }
+
+        return $order;
     }
 }

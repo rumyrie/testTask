@@ -18,12 +18,11 @@ class Request
 
         switch ($_SERVER['REQUEST_METHOD']) {
             case 'POST' :
-                //post data is passed in HTTP request body
                 $this->params = $_POST;
                 break;
             case 'GET' :
-                //get data passes url encoded
-                $this->params = $_GET;
+                $data = $this->prepareData($requestURI);
+                $this->params = $data;
                 break;
         }
     }
@@ -42,6 +41,20 @@ class Request
         $request['method'] = isset($urlParts[2]) ? $urlParts[2] : null;
 
         return $request;
+    }
+
+    public function prepareData(string $url)
+    {
+        $result = [];
+        $data = explode('/', $url);
+        if (isset($data[3])) {
+            $result['page'] = $data[3];
+        }
+        if (isset($data[4])) {
+            $result['order'] = $data[4];
+        }
+
+        return $result;
     }
 
     public function getController()
