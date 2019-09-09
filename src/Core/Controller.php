@@ -76,7 +76,7 @@ abstract class Controller
             return false;
         }
         $login = $_SESSION['login'];
-        $this->model = new User_model();
-        return $this->model->isAdmin($login);
+        $model = new User_model();
+        return $model->isAdmin($login);
     }
 }
