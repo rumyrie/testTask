@@ -51,19 +51,27 @@
         .error_msg {
             color: #ff0000;
         }
+
+        .msg {
+            color: #719e40;
+        }
+
     </style>
 </head>
 <body>
 <header>
     {% if uid %}
-    <a href="http://testtaskmanager.epizy.com/Main/logout">logout</a>
+    <a href="http://testtaskmanager.epizy.com/User/logout">logout</a>
     {% else %}
     <a href="http://testtaskmanager.epizy.com/Main/login">login</a>
     <a href="http://testtaskmanager.epizy.com/Main/register">register</a>
     {% endif %}
 </header>
-{% if Error_Msg%}
+{% if Error_Msg %}
 <div class="error_msg">{{Error_Msg}}</div>
+{% endif %}
+{% if Msg %}
+<div class="msg">{{Msg}}</div>
 {% endif %}
 {% if not data %}
 <p>No tasks are open</p>
@@ -73,16 +81,23 @@
     <th>E-Mail</th>
     <th>Task Text</th>
     <th>Status</th>
+    {% if edit %}
+    <th>Edit</th>
+    {% endif %}
     {% for task in data %}
     <tr>
         <td>{{task.userName}}</td>
         <td>{{task.email}}</td>
         <td>{{task.text}}</td>
         <td>{{task.status_text}}</td>
+        {% if edit %}
+        <td> <a href="http://testtaskmanager.epizy.com/Task/edit/{{task.uid}}">Edit</a></td>
+        {% endif %}
     </tr>
     {% endfor %}
 </table>
 {% endif %}
 
+<a href="http://testtaskmanager.epizy.com/Main/addTask">New Task</a>
 </body>
 </html>

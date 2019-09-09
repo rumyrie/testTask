@@ -6,7 +6,6 @@ require_once(__DIR__ . '/../Models/User_model.php');
 require_once(__DIR__ . '/../Models/Task_model.php');
 
 use App\Core\Controller;
-use App\Models\Task_model;
 use App\Models\User_model;
 
 class User_Controller extends Controller
@@ -87,13 +86,23 @@ class User_Controller extends Controller
 
         $result = $this->model->login($data);
         if ($result['success']) {
-            $tasks = new Task_model();
-            $tasks = $tasks->getList();
-            $tasks['uid'] = true;
-            echo $this->view->render('index.html', $tasks);
+            header("Location: http://testtaskmanager.epizy.com");
+            return;
         } else {
             echo $this->view->render('auth.html', $result);
         }
+        return;
+    }
+
+    public function logout()
+    {
+        if (isset($_COOKIE['session'])) {
+            $this->model->logout();
+            unset($_COOKIE['session']);
+        }
+        session_destroy();
+
+        header("Location: http://testtaskmanager.epizy.com");
         return;
     }
 }

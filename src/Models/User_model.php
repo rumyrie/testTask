@@ -81,16 +81,18 @@ class User_model extends Model
             'success' => true
         ];
 
-        $data['session_id'] = $data['login'] . '/' . md5(md5(trim($data['password'])));
+        $data['session_id'] = $this->generateRandomString();
         $query = "
-            insert into `sessions` (`login`, `session`) values
-            (:login, :session_id)
+            insert into `sessions` (`login`, `session_id`) values
+            ('{$data['login']}', '{$data['session_id']}')
         ";
-        $res = $this->db->prepare($query);
 
-        if ($res->execute($data)) {
+        $this->db->beginTransaction();
+        $res = $this->db->prepare($query);
+        if ($res->execute()) {
             $this->db->commit();
-            setcookie('session', $data['session'],  time()+60*60*24*30);
+            session_start();
+            $_SESSION['login'] = $data['login'];
         } else {
             $this->db->rollBack();
             $result['success'] = false;
@@ -100,23 +102,49 @@ class User_model extends Model
         return $result;
     }
 
-    public function checkAuth($data)
-    {
-        $result = [
-            'success' => true
-        ];
+    private function generateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
 
+    public function logout()
+    {
+        $query = "
+            delete from `sessions`
+            where `session_id` = '" . $_COOKIE['session'] . "'
+        ";
+
+        $this->db->beginTransaction();
+        $res = $this->db->prepare($query);
+        if ($res->execute()) {
+            $this->db->commit();
+        } else {
+            $this->db->rollBack();
+        }
+
+        return;
+    }
+
+    public function isAdmin($login)
+    {
         $query = "
             select
-                1
-            from `sessions`
-            where `login` = :login and `session` = :session
-            ";
-
+                case when (coalesce(`u`.isAdmin, 0) = 1)
+                    then 1
+                    else null
+                end as isAdmin
+            from `users` u
+            where u.login = '" . $login . "'
+        ";
         $res = $this->db->prepare($query);
-        if ($res->execute($data)) {
+        if ($res->execute()) {
             $res = $res->fetchAll(\PDO::FETCH_ASSOC);
-            if (isset($res[0])) {
+            if (isset($res[0]) && $res[0]['isAdmin']) {
                 return true;
             } else {
                 return false;

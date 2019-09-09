@@ -6,7 +6,6 @@ require_once(__DIR__ . '/../Models/Task_model.php');
 
 use App\Core\Controller;
 use App\Models\Task_model;
-use Twig;
 
 class Task_Controller extends Controller
 {
@@ -20,11 +19,15 @@ class Task_Controller extends Controller
                 ['field' => 'email', 'type' => 'string', 'required' => 'true'],
                 ['field' => 'text', 'type' => 'string', 'required' => 'true']
             ],
+            'saveEdited' => [
+                ['field' => 'uid', 'type' => 'integer', 'required' => 'true'],
+                ['field' => 'userName', 'type' => 'string', 'required' => 'true'],
+                ['field' => 'email', 'type' => 'string', 'required' => 'true'],
+                ['field' => 'text', 'type' => 'string', 'required' => 'true'],
+                ['field' => 'status_id', 'type' => 'integer', 'required' => 'true']
+            ],
             'edit' => [
-                ['field' => 'userName', 'type' => 'string', 'required' => ''],
-                ['field' => 'email', 'type' => 'string', 'required' => ''],
-                ['field' => 'text', 'type' => 'string', 'required' => ''],
-                ['field' => 'status_id', 'type' => 'string', 'required' => '']
+                ['field' => 'id', 'type' => 'integer', 'required' => 'true']
             ],
             'delete' => [
                 ['field' => 'uid', 'type' => 'integer', 'required' => 'true']
@@ -40,13 +43,18 @@ class Task_Controller extends Controller
     {
         $data = $this->parseInputData($data);
         if ($this->ErrorData($data)) {
-            echo $this->view->render('index.html', $data);
+            echo $this->view->render('newTask.html', $data);
             return;
         }
 
         $result = $this->model->add($data);
-        echo $this->view->render('index.html', $result);
+        if ($this->ErrorData($result)) {
+            echo $this->view->render('newTask.html', $result);
+            return;
+        }
 
+        $_SESSION['Msg'] = 'New task was added';
+        header("Location: http://testtaskmanager.epizy.com");
         return;
     }
 
@@ -54,32 +62,46 @@ class Task_Controller extends Controller
     {
         $data = $this->parseInputData($data);
         if ($this->ErrorData($data)) {
-            echo $this->view->render('index.html', $data);
+            $_SESSION['Error_Msg'] = $data['Error_Msg'];
+            header("Location: http://testtaskmanager.epizy.com");
             return;
         }
 
-        $result = $this->model->edit($data);
+        $result = $this->model->get($data);
+        if ($this->ErrorData($result)) {
+            $_SESSION['Error_Msg'] = $result['Error_Msg'];
+            header("Location: http://testtaskmanager.epizy.com");
+            return;
+        }
+        $result = $result['data'][0];
+        $result['edit'] = true;
+
+
+        echo $this->view->render('newTask.html', $result);
+        return;
     }
 
-    public function delete($data = [])
+    public function saveEdited($data = [])
     {
-        $data = $this->parseInputData($data);
-        if ($this->ErrorData($data)) {
-            echo $this->view->render('index.html', $data);
+        if (!$this->isAdmin()) {
+            header("Location: http://testtaskmanager.epizy.com/Main/login");
             return;
         }
 
-        $result = $this->model->delete($data);
-    }
-
-    public function getList($data = [])
-    {
         $data = $this->parseInputData($data);
         if ($this->ErrorData($data)) {
-            echo $this->view->render('index.html', $data);
+            echo $this->view->render('newTask.html', $data);
             return;
         }
 
-        $result = $this->model->getList($data);
+        $result = $this->model->saveEdited($data);
+        if ($this->ErrorData($result)) {
+            echo $this->view->render('newTask.html', $result);
+            return;
+        }
+
+        $_SESSION['Msg'] = 'The task was edited';
+        header("Location: http://testtaskmanager.epizy.com");
+        return;
     }
 }

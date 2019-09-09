@@ -70,28 +70,13 @@ abstract class Controller
         return $result;
     }
 
-    public function checkAuth($data = [])
-    {
-        if (empty($data['login'])) {
-            return false;
-        }
-
-        if ($_SESSION['login']) {
-            $this->model = new User_model();
-            $data['session'] = $_SESSION['login'];
-            $result = $this->model->checkAuth($data);
-            if (!$result['success']) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-
-        return true;
-    }
-
     public function isAdmin()
     {
-        return true;
+        if (empty($_SESSION['login'])) {
+            return false;
+        }
+        $login = $_SESSION['login'];
+        $this->model = new User_model();
+        return $this->model->isAdmin($login);
     }
 }
