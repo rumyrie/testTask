@@ -1,23 +1,32 @@
 <?php
 
 namespace App\Core;
+require_once(__DIR__ . '/../Models/User_model.php');
+
+use \Twig\Loader\FilesystemLoader;
+use \Twig\Environment;
+use App\Models\User_model;
 
 abstract class Controller
 {
     protected $inputRules;
     protected $model;
+    protected $loader;
+    protected $view;
 
     public function __construct()
     {
         $this->inputRules = [];
+        $this->loader = new FilesystemLoader(__DIR__ . '/../Views/');
+        $this->view = new Environment($this->loader);
     }
 
     /**
      * Checks whether errors were encountered during parsing of data
-    */
+     */
     protected function ErrorData($data)
     {
-        if (!$data || isset($data['Error_Msg'])) {
+        if (!$data || isset($data['Error_Msg']) || (isset($data['success']) && !$data['success'])) {
             return true;
         }
 
@@ -33,7 +42,7 @@ abstract class Controller
         $result = [];
 
         foreach ($data as $key => $value) {
-            if (is_numeric($value)) {
+            if (is_numeric($value) && $key !== 'password') {
                 $data[$key] = intval($value);
             }
         }
@@ -43,7 +52,7 @@ abstract class Controller
                 if ($rule['required']) {
                     if (empty($data[$rule['field']])) {
                         return [
-                            'Error_Msg' => 'Variable ' . $rule['field'] . ' is not set'
+                            'Error_Msg' => 'The required variable ' . $rule['field'] . ' was not passed'
                         ];
                     }
                 }
@@ -53,12 +62,32 @@ abstract class Controller
                             . gettype($data[$rule['field']]) . ' instead of ' . $rule['type']
                     ];
                 } else {
-                    $result[$rule['field']] = $data[$rule['field']];
+                    $result[$rule['field']] = trim($data[$rule['field']]);
                 }
             }
         }
 
         return $result;
+    }
+
+    public function checkAuth($data = [])
+    {
+        if (empty($data['login'])) {
+            return false;
+        }
+
+        if ($_SESSION['login']) {
+            $this->model = new User_model();
+            $data['session'] = $_SESSION['login'];
+            $result = $this->model->checkAuth($data);
+            if (!$result['success']) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        return true;
     }
 
     public function isAdmin()

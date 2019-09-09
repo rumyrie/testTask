@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Tasks page</title>
+    <link href='//fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
+    <style>
+        header {
+            text-align: right;
+        }
+
+        a {
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+
+        body {
+            margin: 10px 0 0 0;
+            padding: 0;
+            width: 100%;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            text-align: center;
+            color: #34f;
+            font-size: 18px;
+        }
+
+        h1 {
+            color: #719e40;
+            letter-spacing: -3px;
+            font-family: 'Lato', sans-serif;
+            font-size: 100px;
+            font-weight: 200;
+            margin-bottom: 0;
+        }
+
+        table,
+        td,
+        th {
+            margin: 10px 20px 10px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: solid 1px;
+            text-align: center;
+            table-layout: fixed;
+        }
+
+        .error_msg {
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+<header>
+    {% if uid %}
+    <a href="http://testtaskmanager.epizy.com/Main/logout">logout</a>
+    {% else %}
+    <a href="http://testtaskmanager.epizy.com/Main/login">login</a>
+    <a href="http://testtaskmanager.epizy.com/Main/register">register</a>
+    {% endif %}
+</header>
+{% if Error_Msg%}
+<div class="error_msg">{{Error_Msg}}</div>
+{% endif %}
+{% if not data %}
+<p>No tasks are open</p>
+{% else %}
+<table>
+    <th>Username</th>
+    <th>E-Mail</th>
+    <th>Task Text</th>
+    <th>Status</th>
+    {% for task in data %}
+    <tr>
+        <td>{{task.userName}}</td>
+        <td>{{task.email}}</td>
+        <td>{{task.text}}</td>
+        <td>{{task.status_text}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+</body>
+</html>

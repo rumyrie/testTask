@@ -3,17 +3,18 @@
 namespace App\Controllers;
 require_once(__DIR__ . '/../Core/Controller.php');
 require_once(__DIR__ . '/../Models/Task_model.php');
+require_once(__DIR__ . '/../Models/User_model.php');
 
-use App\Core\Controller;
 use App\Models\Task_model;
-use Twig;
+use App\Core\Controller;
+use App\Models\User_model;
+use Twig\Environment;
 
-class Task_Controller extends Controller
+class Main_Controller extends Controller
 {
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Task_model();
         $this->inputRules = [
             'add' => [
                 ['field' => 'userName', 'type' => 'string', 'required' => 'true'],
@@ -36,50 +37,24 @@ class Task_Controller extends Controller
         ];
     }
 
-    public function add($data = [])
+    public function main()
     {
-        $data = $this->parseInputData($data);
-        if ($this->ErrorData($data)) {
-            echo $this->view->render('index.html', $data);
-            return;
-        }
+        $this->model = new Task_model();
+        $result = $this->model->getList();
 
-        $result = $this->model->add($data);
         echo $this->view->render('index.html', $result);
-
         return;
     }
 
-    public function edit($data = [])
+    public function login()
     {
-        $data = $this->parseInputData($data);
-        if ($this->ErrorData($data)) {
-            echo $this->view->render('index.html', $data);
-            return;
-        }
-
-        $result = $this->model->edit($data);
+        echo $this->view->render('auth.html');
+        return;
     }
 
-    public function delete($data = [])
+    public function register()
     {
-        $data = $this->parseInputData($data);
-        if ($this->ErrorData($data)) {
-            echo $this->view->render('index.html', $data);
-            return;
-        }
-
-        $result = $this->model->delete($data);
-    }
-
-    public function getList($data = [])
-    {
-        $data = $this->parseInputData($data);
-        if ($this->ErrorData($data)) {
-            echo $this->view->render('index.html', $data);
-            return;
-        }
-
-        $result = $this->model->getList($data);
+        echo $this->view->render('auth.html', ['register' => true]);
+        return;
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-require(__DIR__ . '/../Core/Model.php');
+require_once(__DIR__ . '/../Core/Model.php');
 
 use App\Core\Model;
 
@@ -93,7 +93,7 @@ class Task_model extends Model
         }
     }
 
-    public function getList($data)
+    public function getList($data = [])
     {
         $result = [
             'success' => true,
@@ -114,23 +114,26 @@ class Task_model extends Model
         $query = "
             select
                 `t`.`uid`,
-                `t`.`user`,
+                `t`.`userName`,
                 `t`.`email`,   
                 `t`.`text`,
                 `s`.`status_text`  
             from `tasks` t
                 left join `statuses` s on s.`status_id` = t.`status_id`
             {$order}
-            limit 3
-            offset :offset
+            limit 3 offset {$params['offset']}
         ";
         $res = $this->db->prepare($query);
-        $res->execute($params);
-        $res = $res->fetchAll();
-        if (empty($res)) {
-            $result['success'] = false;
+        if ($res->execute()) {
+            $res = $res->fetchAll(\PDO::FETCH_ASSOC);
+            if (empty($res)) {
+                $result['success'] = false;
+            } else {
+                $result['data'] = $res;
+            }
         } else {
-            $result['data'] = json_encode($res);
+            $result['success'] = false;
+            $result['Error_Msg'] = $this->db->errorInfo();
         }
 
         return $result;
@@ -156,7 +159,8 @@ class Task_model extends Model
                 end {$parts[1]}";
                 break;
             default:
-                $order = '';
+                $order = "order by
+                `uid` desc";
                 break;
         }
 

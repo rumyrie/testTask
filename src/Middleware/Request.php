@@ -33,11 +33,11 @@ class Request
         $urlParts = explode('/', $url);
 
         //in case of GET requests data is passed as url params
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($urlPartsr)) {
             $urlParts[2] = explode('?', $urlParts[2])[0];
         }
 
-        $request['controller'] = isset($urlParts[1]) ? $urlParts[1] : null;
+        $request['controller'] = isset($urlParts[1]) ? $urlParts[1] : 'Main';
         $request['method'] = isset($urlParts[2]) ? $urlParts[2] : null;
 
         return $request;

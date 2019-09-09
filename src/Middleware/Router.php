@@ -7,12 +7,12 @@ class Router
 {
     public static function Route(Request $request)
     {
+        $method = 'main';
         if ($request->getController()) {
             $controller = $request->getController();
             $method = $request->getMethod();
         } else {
-            $controller = '';
-            $method = '';
+            $controller = 'Main';
         }
 
         $controller = self::getController($controller);
@@ -29,7 +29,10 @@ class Router
         $name = $name . '_Controller';
         $file = __DIR__ . '/../Controllers/' . $name . '.php';
 
-        require($file);
+        if (!require_once($file)) {
+            $name = 'Main_Controller';
+        }
+
         $name = "App\Controllers\\" . $name;
         return new $name();
     }

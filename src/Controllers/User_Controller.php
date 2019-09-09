@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Controllers;
-require(__DIR__ . '/../Core/Controller.php');
-require(__DIR__ . '/../Models/User_model.php');
+require_once(__DIR__ . '/../Core/Controller.php');
+require_once(__DIR__ . '/../Models/User_model.php');
+require_once(__DIR__ . '/../Models/Task_model.php');
 
 use App\Core\Controller;
+use App\Models\Task_model;
 use App\Models\User_model;
 
 class User_Controller extends Controller
@@ -15,7 +17,10 @@ class User_Controller extends Controller
         $this->model = new User_model();
         $this->inputRules = [
             'add' => [
-                ['field' => 'userName', 'type' => 'string', 'required' => 'true'],
+                ['field' => 'login', 'type' => 'string', 'required' => 'true'],
+                ['field' => 'password', 'type' => 'string', 'required' => 'true']
+            ],
+            'login' => [
                 ['field' => 'login', 'type' => 'string', 'required' => 'true'],
                 ['field' => 'password', 'type' => 'string', 'required' => 'true']
             ]
@@ -26,9 +31,69 @@ class User_Controller extends Controller
     {
         $data = $this->parseInputData($data);
         if ($this->ErrorData($data)) {
-            return isset($data['Error_Msg']) ? $data['Error_Msg'] : false;
+            echo $this->view->render('auth.html', [
+                'register' => true,
+                'Error_Msg' => isset($data['Error_Msg']) ? $data['Error_Msg'] : 'Incorrect data'
+            ]);
+            return;
         }
 
-        $this->model->add($data);
+        $user = $this->model->checkUser($data);
+        if ($this->ErrorData($user)) {
+            $user['register'] = true;
+            echo $this->view->render('auth.html', $user);
+            return;
+        }
+        if (!empty($user['data'])) {
+            echo $this->view->render('auth.html', [
+                'register' => true,
+                'Error_Msg' => 'User ' . $data['login'] . ' already exists'
+            ]);
+            return;
+        }
+
+        $result = $this->model->add($data);
+        if ($result['success']) {
+            $this->login($data);
+        } else {
+            $result['register'] = true;
+            echo $this->view->render('auth.html', $result);
+        }
+        return;
+    }
+
+    public function login($data = [])
+    {
+        $data = $this->parseInputData($data);
+        if ($this->ErrorData($data)) {
+            echo $this->view->render('auth.html', [
+                'Error_Msg' => isset($data['Error_Msg']) ? $data['Error_Msg'] : 'Incorrect data'
+            ]);
+            return;
+        }
+
+        $user = $this->model->checkUser($data);
+        if ($this->ErrorData($user)) {
+            echo $this->view->render('auth.html', $user);
+            return;
+        }
+
+        if (empty($user['data'])) {
+            echo $this->view->render('auth.html', [
+                'Error_Msg' => 'User ' . $data['login'] . ' does not exist'
+            ]);
+            return;
+        }
+
+        $result = $this->model->login($data);
+        if ($result['success']) {
+            $tasks = new Task_model();
+            $tasks = $tasks->getList();
+            $tasks['uid'] = true;
+            echo $this->view->render('index.html', $tasks);
+        } else {
+            echo $this->view->render('auth.html', $result);
+        }
+        return;
     }
 }
