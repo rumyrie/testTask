@@ -46,7 +46,7 @@ class Task_model extends Model
         $query = "
             update `tasks`
             set
-                `username` = '" . $data['username'] . "',
+                `userName` = '" . $data['userName'] . "',
                 `email` = '" . $data['email'] . "',
                 `text` = '" . $data['text'] . "',
                 `status_id` = '" . $data['status_id'] . "'
@@ -54,39 +54,6 @@ class Task_model extends Model
 
         $this->db->beginTransaction();
         $res = $this->db->prepare($query);
-        if ($res->execute($data)) {
-            $this->db->commit();
-            return $result;
-        } else {
-            $this->db->rollBack();
-            $result['success'] = false;
-            $result['Error_Msg'] = $this->db->errorInfo();
-            return $result;
-        }
-    }
-
-    public function edit($data)
-    {
-        $result = [
-            'success' => true
-        ];
-        $params = '';
-        foreach ($data as $key => $value) {
-            if ($key != 'uid') {
-                $params .= "`{$key}` = :{$key}
-                ";
-            }
-        }
-
-        $this->db->beginTransaction();
-        $query = "
-            update `tasks`
-            set
-                {$params}
-            where `uid` = :uid
-        ";
-        $res = $this->db->prepare($query);
-
         if ($res->execute($data)) {
             $this->db->commit();
             return $result;
