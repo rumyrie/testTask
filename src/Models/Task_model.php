@@ -169,4 +169,27 @@ class Task_model extends Model
 
         return $result;
     }
+
+    public function delete($data)
+    {
+        $result = [
+            'success' => true
+        ];
+
+        $query = "
+            delete from `tasks`
+            where `uid` = ". $data['id'];
+
+        $this->db->beginTransaction();
+        $res = $this->db->prepare($query);
+        if ($res->execute()) {
+            $this->db->commit();
+            return $result;
+        } else {
+            $this->db->rollBack();
+            $result['success'] = false;
+            $result['Error_Msg'] = $this->db->errorInfo();
+            return $result;
+        }
+    }
 }

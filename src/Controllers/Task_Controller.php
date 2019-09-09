@@ -30,7 +30,7 @@ class Task_Controller extends Controller
                 ['field' => 'id', 'type' => 'integer', 'required' => 'true']
             ],
             'delete' => [
-                ['field' => 'uid', 'type' => 'integer', 'required' => 'true']
+                ['field' => 'id', 'type' => 'integer', 'required' => 'true']
             ],
             'getList' => [
                 ['field' => 'order', 'type' => 'string', 'required' => ''],
@@ -101,6 +101,31 @@ class Task_Controller extends Controller
         }
 
         $_SESSION['Msg'] = 'The task was edited';
+        header("Location: http://testtaskmanager.epizy.com");
+        return;
+    }
+
+    public function delete($data = [])
+    {
+        if (!$this->isAdmin()) {
+            header("Location: http://testtaskmanager.epizy.com/Main/login");
+            return;
+        }
+
+        $data = $this->parseInputData($data);
+        if ($this->ErrorData($data)) {
+            echo $this->view->render('newTask.html', $data);
+            return;
+        }
+
+        $result = $this->model->delete($data);
+        if ($this->ErrorData($result)) {
+            $_SESSION['Error_Msg'] = $result['Error_Msg'];
+            header("Location: http://testtaskmanager.epizy.com");
+            return;
+        }
+
+        $_SESSION['Msg'] = 'The task was deleted';
         header("Location: http://testtaskmanager.epizy.com");
         return;
     }
