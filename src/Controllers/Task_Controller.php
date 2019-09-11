@@ -24,7 +24,7 @@ class Task_Controller extends Controller
                 ['field' => 'userName', 'type' => 'string', 'required' => 'true'],
                 ['field' => 'email', 'type' => 'string', 'required' => 'true'],
                 ['field' => 'text', 'type' => 'string', 'required' => 'true'],
-                ['field' => 'status_id', 'type' => 'integer', 'required' => 'true']
+                ['field' => 'status_id', 'type' => 'string', 'required' => 'true']
             ],
             'edit' => [
                 ['field' => 'id', 'type' => 'integer', 'required' => 'true']
@@ -88,14 +88,17 @@ class Task_Controller extends Controller
             return;
         }
 
+        return;
         $data = $this->parseInputData($data);
         if ($this->ErrorData($data)) {
+            $data['edit'] = true;
             echo $this->view->render('newTask.html', $data);
             return;
         }
 
         $result = $this->model->saveEdited($data);
         if ($this->ErrorData($result)) {
+            $result['edit'] = true;
             echo $this->view->render('newTask.html', $result);
             return;
         }

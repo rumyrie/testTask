@@ -41,20 +41,21 @@ class Task_model extends Model
         $result = [
             'success' => true
         ];
-        $data['status_id'] = ($data['status_id'] == 0) ? 2 : 3;
+        $data['status_id'] = ($data['status_id'] == "'0'") ? 2 : 3;
+
 
         $query = "
-            update `tasks`
+            update tasks
             set
-                `userName` = '" . $data['userName'] . "',
-                `email` = '" . $data['email'] . "',
-                `text` = '" . $data['text'] . "',
-                `status_id` = '" . $data['status_id'] . "'
-            where `uid` = " . $data['uid'];
+                userName = '" . $data['userName'] . "',
+                email = '" . $data['email'] . "',
+                text = '" . $data['text'] . "',
+                status_id = " . $data['status_id'] . "
+            where `tasks`.`uid` = " . $data['uid'];
 
         $this->db->beginTransaction();
         $res = $this->db->prepare($query);
-        if ($res->execute($data)) {
+        if ($res->execute()) {
             $this->db->commit();
             return $result;
         } else {
@@ -74,13 +75,34 @@ class Task_model extends Model
 
         $params['offset'] = 0;
 
-        if (isset($data['page'])) {
-            $params['offset'] = 3 * $data['page'];
+        if (!empty($data['page'])) {
+            $params['offset'] = 3 * ($data['page'] - 1);
         }
 
         $order = '';
-        if (isset($data['order'])) {
-            $order = $this->prepareOrderPart($data);
+        if (!empty($data['order'])) {
+            $order = $this->prepareOrderPart($data['order']);
+        }
+
+        $query = "
+            select
+                count(*) as total
+            from `tasks`
+        ";
+
+        $total = $this->db->prepare($query);
+        $total->execute();
+        $total = $total->fetchAll(\PDO::FETCH_ASSOC);
+
+        if (!isset($total[0]) || empty($total[0]['total'])) {
+            $result['success'] = false;
+            return $result;
+        } else {
+            $total = $total[0]['total'];
+            $i = $total / 3;
+            if ($total % 3)
+                $i++;
+            $total = $i;
         }
 
         $query = "
@@ -102,6 +124,9 @@ class Task_model extends Model
                 $result['success'] = false;
             } else {
                 $result['data'] = $res;
+                $result['total'] = $total;
+                $result['order'] = $data['order'];
+                $result['page'] = $data['page'];
             }
         } else {
             $result['success'] = false;
@@ -113,7 +138,7 @@ class Task_model extends Model
 
     private function prepareOrderPart($data)
     {
-        $parts = explode('/', $data);
+        $parts = explode('_', $data);
         switch ($parts[0]) {
             case 'userName':
                 $order = "order by
@@ -178,7 +203,7 @@ class Task_model extends Model
 
         $query = "
             delete from `tasks`
-            where `uid` = ". $data['id'];
+            where `uid` = " . $data['id'];
 
         $this->db->beginTransaction();
         $res = $this->db->prepare($query);

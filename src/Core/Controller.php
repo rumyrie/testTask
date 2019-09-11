@@ -51,16 +51,14 @@ abstract class Controller
             foreach ($this->inputRules[$method] as $rule) {
                 if ($rule['required']) {
                     if (empty($data[$rule['field']])) {
-                        return [
-                            'Error_Msg' => 'The required variable ' . $rule['field'] . ' was not passed'
-                        ];
+                        $data['Error_Msg'] = 'The required variable ' . $rule['field'] . ' was not passed';
+                        return $data;
                     }
                 }
                 if (isset($data[$rule['field']]) && gettype($data[$rule['field']]) != $rule['type']) {
-                    return [
-                        'Error_Msg' => 'Variable ' . $rule['field'] . ' has the wrong type: '
-                            . gettype($data[$rule['field']]) . ' instead of ' . $rule['type']
-                    ];
+                    $data['Error_Msg'] = 'Variable ' . $rule['field'] . ' has the wrong type: '
+                        . gettype($data[$rule['field']]) . ' instead of ' . $rule['type'];
+                    return $data;
                 } else {
                     $result[$rule['field']] = trim($data[$rule['field']]);
                 }

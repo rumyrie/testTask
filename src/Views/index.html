@@ -47,6 +47,51 @@
             text-align: center;
             table-layout: fixed;
         }
+        #centeredmenu {
+            float:left;
+            width:100%;
+            background:#fff;
+            overflow:hidden;
+            position:relative;
+        }
+        #centeredmenu ul {
+            clear:left;
+            float:left;
+            list-style:none;
+            margin:0;
+            padding:0;
+            position:relative;
+            left:50%;
+            text-align:center;
+        }
+        #centeredmenu ul li {
+            display:block;
+            float:left;
+            list-style:none;
+            margin:0;
+            padding:0;
+            position:relative;
+            right:50%;
+        }
+        #centeredmenu ul li a {
+            display:block;
+            margin:0 0 0 1px;
+            padding:3px 10px;
+            background:#ddd;
+            color:#000;
+            text-decoration:none;
+            line-height:1.3em;
+        }
+        #centeredmenu ul li a:hover {
+            background:#34f;
+            color:#fff;
+        }
+        #centeredmenu ul li a.active,
+        #centeredmenu ul li a.active:hover {
+            color:#fff;
+            background:#000;
+            font-weight:bold;
+        }
 
         .error_msg {
             color: #ff0000;
@@ -73,9 +118,7 @@
 {% if Msg %}
 <div class="msg">{{Msg}}</div>
 {% endif %}
-{% if not data %}
-<p>No tasks are open</p>
-{% else %}
+{% if data %}
 <table>
     <th>Username</th>
     <th>E-Mail</th>
@@ -91,11 +134,51 @@
         <td>{{task.text}}</td>
         <td>{{task.status_text}}</td>
         {% if edit %}
-        <td> <a href="http://testtaskmanager.epizy.com/Task/edit/{{task.uid}}">Edit</a></td>
+        <td><a href="http://testtaskmanager.epizy.com/Task/edit/{{task.uid}}">Edit</a></td>
         {% endif %}
     </tr>
     {% endfor %}
 </table>
+<div id="centeredmenu">
+    {% set url="http://testtaskmanager.epizy.com/Main/main/" %}
+    {% set total=total %}
+    {% if page %}
+    {% set current=page %}
+    {% else %}
+    {% set current=1 %}
+    {% endif %}
+    {% set nearbyPagesLimit=4 %}
+
+    {% if total > 1 %}
+    <ul class="pagination">
+        {% for i in 1..total %}
+        {% if 0 == (current - nearbyPagesLimit) - loop.index %}
+        <li><a href="{{ (url ~ 1)|e }}">1</a></li>
+        {% if 1 != loop.index %}
+        <li><span>…</span></li>
+        {% endif %}
+        {% elseif 0 == (current + nearbyPagesLimit) - loop.index  and (current + nearbyPagesLimit) < total %}
+        <li><span>…</span></li>
+        {% elseif 0 < (current - nearbyPagesLimit) - loop.index %}
+        {% elseif 0 > (current + nearbyPagesLimit) - loop.index %}
+        {% else %}
+        <li {{ current == loop.index ? 'class="active"' }}>
+        {% if current == loop.index  %}
+        <a>{{ loop.index }}</a>
+        {% else %}
+        <a href="{{ url ~ loop.index }}">{{ loop.index }}</a>
+        {% endif %}
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% if current != total  and (current + nearbyPagesLimit) < total %}
+        <li><a href="{{ (url ~ total)|e }}">{{ total }}</a></li>
+        {% endif %}
+    </ul>
+    {% endif %}
+</div>
+{% else %}
+<p>No tasks are open</p>
 {% endif %}
 
 <a href="http://testtaskmanager.epizy.com/Main/addTask">New Task</a>

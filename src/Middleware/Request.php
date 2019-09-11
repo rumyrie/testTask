@@ -59,6 +59,7 @@ class Request
         $data = explode('/', $url);
         if (isset($data[3])) {
             $result['id'] = $data[3];
+            $result['page'] = $data[3];
         }
         if (isset($data[4])) {
             $result['order'] = $data[4];

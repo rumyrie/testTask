@@ -13,12 +13,24 @@ class Main_Controller extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->inputRules = [
+            'main' => [
+                ['field' => 'page', 'type' => 'integer', 'required' => ''],
+                ['field' => 'order', 'type' => 'string', 'required' => '']
+            ]
+        ];
     }
 
-    public function main()
+    public function main($data = [])
     {
         $this->model = new Task_model();
-        $result = $this->model->getList();
+        $data = $this->parseInputData($data);
+        if ($this->ErrorData($data)) {
+            echo $this->view->render('index.html', $data);
+            return;
+        }
+
+        $result = $this->model->getList($data);
 
         if (isset($_SESSION['login'])) {
             $result['uid'] = true;
