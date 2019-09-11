@@ -120,12 +120,34 @@
 {% endif %}
 {% if data %}
 <table>
-    <th>Username</th>
-    <th>E-Mail</th>
+    {% if order == 'userName_asc' %}
+        <th><a href="http://testtaskmanager.epizy.com/Main/main/1/userName_desc">Username △ asc</a></th>
+    {% elseif order == 'userName_desc' %}
+        <th><a href="http://testtaskmanager.epizy.com/">Username ▽ desc</a></th>
+    {% else %}
+        <th><a href="http://testtaskmanager.epizy.com/Main/main/1/userName_asc">Username</a></th>
+    {% endif %}
+
+    {% if order == 'email_asc' %}
+        <th><a href="http://testtaskmanager.epizy.com/Main/main/1/email_desc">Email △ asc</a></th>
+    {% elseif order == 'email_desc' %}
+        <th><a href="http://testtaskmanager.epizy.com/">Email ▽ desc</a></th>
+    {% else %}
+        <th><a href="http://testtaskmanager.epizy.com/Main/main/1/email_asc">Email</a></th>
+    {% endif %}
+
     <th>Task Text</th>
-    <th>Status</th>
+
+    {% if order == 'status_asc' %}
+        <th><a href="http://testtaskmanager.epizy.com/Main/main/1/status_desc">Status △ asc</a></th>
+    {% elseif order == 'status_desc' %}
+        <th><a href="http://testtaskmanager.epizy.com/">Status ▽ desc</a></th>
+    {% else %}
+        <th><a href="http://testtaskmanager.epizy.com/Main/main/1/status_asc">Status</a></th>
+    {% endif %}
+
     {% if edit %}
-    <th>Edit</th>
+        <th>Edit</th>
     {% endif %}
     {% for task in data %}
     <tr>

@@ -41,7 +41,7 @@ class Task_model extends Model
         $result = [
             'success' => true
         ];
-        $data['status_id'] = ($data['status_id'] == "'0'") ? 2 : 3;
+        $data['status_id'] = ($data['status_id'] == "'0'") ? 2 : 1;
 
 
         $query = "
@@ -150,10 +150,7 @@ class Task_model extends Model
                 break;
             case 'status':
                 $order = "order by
-                case when (s.`status_id` in (0, 3))
-                    then 1
-                    else 0
-                end {$parts[1]}";
+                s.`status_id` {$parts[1]}";
                 break;
             default:
                 $order = "order by
@@ -172,7 +169,7 @@ class Task_model extends Model
                 `userName`,
                 `email`,
                 `text`,
-                case when (`status_id` in (0,2))
+                case when (`status_id` in (0,1))
                     then 'new'
                     else 'completed'
                 end as status_id

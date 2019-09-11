@@ -30,6 +30,16 @@ class Main_Controller extends Controller
             return;
         }
 
+        if (!empty($data['order'])) {
+            $_SESSION['order'] = $data['order'];
+        }
+        if (empty($data['page']) && empty($data['order'])) {
+            unset($_SESSION['order']);
+        }
+        if (!empty($_SESSION['order']) && empty($data['order'])) {
+            $data['order'] = $_SESSION['order'];
+        }
+
         $result = $this->model->getList($data);
 
         if (isset($_SESSION['login'])) {
@@ -41,6 +51,9 @@ class Main_Controller extends Controller
         if (isset($_SESSION['Msg'])) {
             $result['Msg'] = $_SESSION['Msg'];
             unset($_SESSION['Msg']);
+        }
+        if (!empty($_SESSION['order'])) {
+            $result['order'] = $_SESSION['order'];
         }
 
         echo $this->view->render('index.html', $result);
